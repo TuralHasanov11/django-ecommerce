@@ -1,0 +1,197 @@
+{% extends 'app.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+      <div id="orderAlert" class="alert alert-success d-none" role="alert">
+        
+      </div>
+		<div class="card card-body" id="form-wrapper">
+      <form class="row g-3" id="form">
+          {% csrf_token %}
+          <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input class="form-control" value="{% if request.user.is_authenticated %}{{request.user.customer.name}}{% endif %}" {% if request.user.is_authenticated %}disabled{% endif %} id="name">
+          </div>
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" value="{% if request.user.is_authenticated %}{{request.user.customer.email}}{% endif %}" {% if request.user.is_authenticated %}disabled{% endif %} class="form-control" id="email">
+          </div>
+          {% if order.shipping %}
+          <hr>
+          <div id="shipping">
+            <h4>Shipping Information</h4>
+            <div class="col-12">
+              <label for="address" class="form-label">Address</label>
+              <input type="text" class="form-control" id="address">
+            </div>
+            <div class="col-md-6">
+              <label for="city" class="form-label">City</label>
+              <input type="text" class="form-control" id="city">
+            </div>
+            <div class="col-md-6">
+                <label for="state" class="form-label">State</label>
+                <input type="text" class="form-control" id="state">
+              </div>
+            
+            <div class="col-md-2">
+              <label for="zipcode" class="form-label">Zip</label>
+              <input type="text" class="form-control" id="zipcode">
+            </div>
+          
+          </div>
+          {% endif %}
+          <div class="col-12">
+            <button type="button" id="form-btn" data-bs-toggle="collapse" data-bs-target="#payment-info" aria-expanded="false" aria-controls="payment-info" class="btn btn-primary">Continue</button>
+          </div>
+        </form>
+		  </div>
+        <div class="card card-body collapse" id="payment-info">
+            <small>Paypal Options</small>
+            <!-- <div id="paypal-button-container"></div> -->
+            <button id="make-payment" class="btn btn-success">Make Payment</button>
+		</div>
+		
+	</div>
+
+	<div class="col-lg-6">
+		<div class="card card-body">
+            <a  class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Back to Cart</a>
+            <hr>
+            <h3>Order Summary</h3>
+            <hr>
+            
+            {% for item in items %}
+            <div class="cart-row">
+              <div style="flex:2">
+                  <img class="row-image" src="{{item.product.imageURL}}">
+              </div>
+              <div style="flex:2"><p>{{item.product.name}}</p></div>
+              <div style="flex:1"><p>${{item.product.price|floatformat:2}}</p></div>
+              <div style="flex:1"><p>x{{item.quantity}}</p></div>
+            </div>
+            {% endfor %}
+
+            <h5>Items:   {{order.items}}</h5>
+            <h5>Total:   ${{order.total|floatformat:2}}</h5>
+        </div>
+	</div>
+</div>
+
+<!-- change client id -->
+<!-- <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD&disable-funding=credit"></script> -->
+
+<script>
+  var total = '{{order.total}}'
+  // Render the PayPal button into #paypal-button-container
+  // paypal.Buttons({
+
+  //     style:{
+  //       color:'blue',
+  //       shape: 'pill',
+  //     },
+  //     // Set up the transaction
+  //     createOrder: function(data, actions) {
+  //         return actions.order.create({
+  //             purchase_units: [{
+  //                 amount: {
+  //                     value: parseFloat(total).toFixed(2)
+  //                 }
+  //             }]
+  //         });
+  //     },
+
+  //     // Finalize the transaction
+  //     onApprove: function(data, actions) {
+  //         return actions.order.capture().then(function(orderData) {
+  //             submitFormData()
+  //             console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+  //             var transaction = orderData.purchase_units[0].payments.captures[0];
+  //             alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details')
+  //         });
+  //     }
+
+
+  // }).render('#paypal-button-container');
+</script>
+
+<script type="text/javascript">
+  var shipping = '{{order.shipping}}'
+  var user = '{{request.user}}'
+  var form = document.getElementById('form')
+
+  var formBtn = document.getElementById('form-btn')
+
+  formBtn.addEventListener('click', (e)=>{
+    document.getElementById('form-btn').classList.add('hidden')
+  })
+
+  document.getElementById('make-payment').addEventListener('click', (e)=>{
+    e.currentTarget.setAttribute('disabled',true)
+    submitFormData()
+  })
+
+  function submitFormData(){
+    var userData = {
+      name:null,
+      email:null,
+      total:total
+    }
+
+    var shippingData={
+      address:null,
+      city:null,
+      state:null,
+      zipcode:null
+    }
+
+    if(shipping!='False'){ 
+      shippingData.address = form.address.value
+      shippingData.city = form.city.value
+      shippingData.state = form.state.value
+      shippingData.zipcode = form.zipcode.value
+    }
+
+    if(user!='AnonymousUser'){ 
+      userData.name = form.name.value
+      userData.email = form.email.value
+    }
+
+    var url = '/process-order/'
+
+    fetch(url,{
+        method:'POST',
+        headers:{
+            'Content-Type':'application/json',
+            'X-CSRFToken':csrftoken
+        },
+        body:JSON.stringify({
+            shipping:shippingData,
+            form:userData
+        })
+    }).then((response)=>{
+        return response.json()
+    }).then((data)=>{
+
+      cart = {}
+      document.cookie = 'cart='+JSON.stringify(cart)+";domain=;path=/"
+
+      document.getElementById('orderAlert').classList.replace('d-none', 'd-block')
+      document.getElementById('orderAlert').innerHTML=data
+      
+      alert(data)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // location.reload()
+      
+    }).catch(err => {
+        console.log(err)
+    });
+
+    
+  }
+
+</script>
+
+{% endblock content %}
