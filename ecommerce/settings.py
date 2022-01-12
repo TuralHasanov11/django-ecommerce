@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'ct7=+nv&9tsxs%kwfh5_oodkx(o&=j=cz(bs9ks@ub=%!38=o_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = False # True
+
+# # SECURITY WARNING: keep the secret key used in production secret!
+# SECRET_KEY = os.environ.get('SECRET',"ct7=+nv&9tsxs%kwfh5_oodkx(o&=j=cz(bs9ks@ub=%!38=o_")
+
+# # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = str(os.environ.get('DEBUG')) == "1"
 
 ALLOWED_HOSTS = ['https://tural-django-ecommerce.herokuapp.com/', '127.0.0.1']
+
+# if not DEBUG:
+#     ALLOWED_HOSTS += [os.environ.get('ALLOWED_HOSTS')]
 
 
 # Application definition
@@ -83,6 +93,7 @@ DATABASES = {
     }
 }
 
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
