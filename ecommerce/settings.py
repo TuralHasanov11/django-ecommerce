@@ -25,7 +25,7 @@ SECRET_KEY = 'ct7=+nv&9tsxs%kwfh5_oodkx(o&=j=cz(bs9ks@ub=%!38=o_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = True
+DEBUG = False
 
 # # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = os.environ.get('SECRET',"ct7=+nv&9tsxs%kwfh5_oodkx(o&=j=cz(bs9ks@ub=%!38=o_")
@@ -33,7 +33,7 @@ DEBUG = True
 # # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = str(os.environ.get('DEBUG')) == "1"
 
-ALLOWED_HOSTS = ['https://tural-django-ecommerce.herokuapp.com/', '127.0.0.1']
+ALLOWED_HOSTS = ['tural-django-ecommerce.herokuapp.com', '127.0.0.1']
 
 # if not DEBUG:
 #     ALLOWED_HOSTS += [os.environ.get('ALLOWED_HOSTS')]
