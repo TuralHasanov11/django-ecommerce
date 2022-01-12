@@ -11,13 +11,6 @@ h6 {
   color: hsl(0, 0%, 30%);
 }
 
-.box-element {
-  box-shadow: hsl(0, 0%, 80%) 0 0 16px;
-  background-color: #fff;
-  border-radius: 4px;
-  padding: 10px;
-}
-
 .thumbnail {
   -webkit-box-shadow: -1px -3px 5px -2px rgba(214, 214, 214, 1);
   -moz-box-shadow: -1px -3px 5px -2px rgba(214, 214, 214, 1);
